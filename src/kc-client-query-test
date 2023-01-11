@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+source ./.env.test
+
+test_should_print_query_with_default_values() {
+  # TEST: default query first 20 itens
+  # ./kc-client-query | yq '.[] |= pick(["id"])'
+  assert_equals "20" $(./kc-client-query | yq '. | length()')
+}
+
+test_should_print_query_with_max_2_values() {
+  # TEST: default query first 20 itens
+  assert_equals "2" "$(MAX=2 ./kc-client-query | yq '. | length()')"
+}

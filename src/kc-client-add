@@ -1,0 +1,19 @@
+#!/bin/bash
+source ./kc-token
+
+CLIENT_ID=${1-$CLIENT_ID}
+REALM=${2-$REALM}
+REALM=${REALM-master}
+
+
+CLIENT_ADD_RESULT=$(curl -sSL -D - --request POST \
+  --url "${KC_INSTANCE_URL}/auth/admin/realms/${REALM}/clients" \
+  --header "Authorization: Bearer ${KC_ACCESS_TOKEN}" \
+  --header 'Content-Type: application/json;charset=utf-8' \
+  --data "{ \"enabled\":true, \"attributes\":{}, \"redirectUris\":[], \"clientId\":\"${CLIENT_ID}\", \"protocol\":\"openid-connect\"}" \
+  -o /dev/null | \
+  grep "Location:" | \
+  cut -d ' ' -f2-
+)
+
+echo -n $CLIENT_ADD_RESULT

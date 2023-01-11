@@ -1,0 +1,119 @@
+#!/bin/bash
+
+source ./.env
+
+# echo $KC_INSTANCE_URL
+KC_TOKEN=$(curl -s --request POST \
+  --url ${KC_INSTANCE_URL}/auth/realms/${REALM}/protocol/openid-connect/kc-token \
+  --header 'Content-Type: application/x-www-form-urlencoded' \
+  --data grant_type=client_credentials \
+  --data client_id=${KC_CLIENT_ID-'shell4all-keycloak'} \
+  --data client_secret=${KC_CLIENT_SECRET})
+
+KC_ACCESS_TOKEN=$(echo $KC_TOKEN |  yq '.access_token')
+
+# echo -n $KC_ACCESS_TOKEN
+
+add () {
+  # kc-client-add
+
+  CLIENT_ID=${1-$CLIENT_ID}
+  REALM=${2-$REALM}
+  REALM=${REALM-master}
+  
+  
+  CLIENT_ADD_RESULT=$(curl -sSL -D - --request POST \
+    --url "${KC_INSTANCE_URL}/auth/admin/realms/${REALM}/clients" \
+    --header "Authorization: Bearer ${KC_ACCESS_TOKEN}" \
+    --header 'Content-Type: application/json;charset=utf-8' \
+    --data "{ \"enabled\":true, \"attributes\":{}, \"redirectUris\":[], \"clientId\":\"${CLIENT_ID}\", \"protocol\":\"openid-connect\"}" \
+    -o /dev/null | \
+    grep "Location:" | \
+    cut -d ' ' -f2-
+  )
+  
+  echo -n $CLIENT_ADD_RESULT
+  # kc-client-add
+}
+
+
+del () {
+  # kc-client-del
+
+  [[ "$1" =~ ^https?$ ]] && CLIENT_URL=$1
+  [[ "$1" =~ ^[a-z0-9-]+$ ]] && CLIENT_URL="${KC_REALM_URL}/clients/$1"
+  
+  CLIENT_EDIT_RESULT=$(curl -s --request DELETE \
+    --url ${CLIENT_URL} \
+    --header "Authorization: Bearer ${KC_ACCESS_TOKEN}"
+  )
+  
+  echo -n $CLIENT_EDIT_RESULT
+  
+  # kc-client-del
+}
+
+
+edit () {
+  # kc-client-edit
+
+  CLIENT_ID_URL=${1-$CLIENT_ID_URL}
+  CLIENT_DATA=${2-$CLIENT_DATA}
+  
+  # echo "CLIENT_ID_URL: $CLIENT_ID_URL"
+  # echo "CLIENT_DATA: $CLIENT_DATA"
+  # echo $CLIENT_DATA
+  
+  CLIENT_EDIT_RESULT=$(curl ${CLIENT_ID_URL} \
+    -s -X PUT \
+    -H "Authorization: Bearer ${KC_ACCESS_TOKEN}" \
+    -H 'Content-Type: application/json;charset=utf-8' \
+    --data-raw "${CLIENT_DATA}"
+  )
+  
+  echo -n $CLIENT_EDIT_RESULT
+  
+  # kc-client-edit
+}
+
+
+query () {
+  # kc-client-query
+
+  ### USAGE:
+  #  kc-client-get 'my-client-id-query'                  # it's will bring by default the first page with max 20 records
+  #  FIRST=20 MAX=20 kc-client-get 'my-client-id-query'  # it's will skip first 20 records and bring max 20 records
+  
+  CLIENT_ID=${1-$CLIENT_ID}
+  REALM=${2-$REALM}
+  REALM=${REALM-master}
+  
+  FIRST=${FIRST-0}
+  MAX=${MAX-20}
+  
+  CLIENT_ID_URL="${KC_INSTANCE_URL}/auth/admin/realms/${REALM}/clients?first=${FIRST}&max=${MAX}&search=true"
+  
+  if [ ! -z "$CLIENT_ID" ]; then
+    CLIENT_ID_URL="$CLIENT_ID_URL&clientId=${CLIENT_ID}"
+  fi
+  
+  CLIENT_GET_RESULT=$(curl -s --request GET \
+    --url "${CLIENT_ID_URL}" \
+    --header "Authorization: Bearer ${KC_ACCESS_TOKEN}" \
+    --header 'Content-Type: application/json;charset=utf-8'
+  )
+  
+  echo -n $CLIENT_GET_RESULT
+  # kc-client-query
+}
+
+
+version () {
+  # kc-version
+echo -n "1.0.0"
+  # kc-version
+}
+
+COMMAND=$1
+shift
+$COMMAND $*

@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+source .env.test
+
+setup() {
+  client_uuid=$(./kc-client-query $TEST_CLIENT_ID | yq --null-input '.[0].id | select( . != null )')
+  ./kc-client-del $client_uuid > /dev/null
+}
+teardown() {
+  setup
+}
+
+test_add_new_client() {
+  # TEST: default query first 20 itens
+  client_uuid=$(./kc-client-query $TEST_CLIENT_ID | yq --null-input '.[0].id | select( . != null )')
+
+  if [ "$client_uuid" ]; then
+    # ./kc-client-query $client_id
+    fail "Client id '$TEST_CLIENT_ID' already exists!"
+  fi
+
+  client_url=$(./kc-client-add $TEST_CLIENT_ID)
+  assert_not_equals "" client_url
+  ./kc-client-del $client_url
+}

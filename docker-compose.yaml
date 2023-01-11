@@ -1,0 +1,35 @@
+version: '3'
+
+services:
+  db:
+    image: postgres:14.1-alpine
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_DB: bitnami_keycloak
+    ports:
+      - '5432:5432'
+    volumes:
+      - db_data:/var/lib/postgresql/data
+  kc:
+    image: bitnami/keycloak:16.1.1
+    environment:
+      KEYCLOAK_DATABASE_HOST: db
+      # KEYCLOAK_DATABASE_PORT: PostgreSQL port. Default: 5432.
+      # KEYCLOAK_DATABASE_NAME: PostgreSQL database name. Default: bitnami_keycloak.
+
+      KEYCLOAK_DATABASE_USER: postgres
+      KEYCLOAK_DATABASE_PASSWORD: postgres
+      # KEYCLOAK_DATABASE_SCHEMA: PostgreSQL database schema. Default: public.
+      KEYCLOAK_JDBC_PARAMS: "useSSL=false"
+      KEYCLOAK_ADMIN_USER: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+    ports:
+      - 8080:8080
+    depends_on:
+      - db
+
+volumes:
+  db_data:
+    driver: local

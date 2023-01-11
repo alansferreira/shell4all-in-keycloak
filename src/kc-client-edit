@@ -1,0 +1,19 @@
+#!/bin/bash
+source ./kc-token
+
+CLIENT_ID_URL=${1-$CLIENT_ID_URL}
+CLIENT_DATA=${2-$CLIENT_DATA}
+
+# echo "CLIENT_ID_URL: $CLIENT_ID_URL"
+# echo "CLIENT_DATA: $CLIENT_DATA"
+# echo $CLIENT_DATA
+
+CLIENT_EDIT_RESULT=$(curl ${CLIENT_ID_URL} \
+  -s -X PUT \
+  -H "Authorization: Bearer ${KC_ACCESS_TOKEN}" \
+  -H 'Content-Type: application/json;charset=utf-8' \
+  --data-raw "${CLIENT_DATA}"
+)
+
+echo -n $CLIENT_EDIT_RESULT
+

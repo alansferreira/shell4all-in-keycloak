@@ -1,0 +1,15 @@
+#!/bin/bash
+
+source ./.env
+
+# echo $KC_INSTANCE_URL
+KC_TOKEN=$(curl -s --request POST \
+  --url ${KC_INSTANCE_URL}/auth/realms/${REALM}/protocol/openid-connect/kc-token \
+  --header 'Content-Type: application/x-www-form-urlencoded' \
+  --data grant_type=client_credentials \
+  --data client_id=${KC_CLIENT_ID-'shell4all-keycloak'} \
+  --data client_secret=${KC_CLIENT_SECRET})
+
+KC_ACCESS_TOKEN=$(echo $KC_TOKEN |  yq '.access_token')
+
+# echo -n $KC_ACCESS_TOKEN
