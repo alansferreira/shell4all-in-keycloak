@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+source .env.test
+
+setup() {
+  ./kc-client-add $TEST_CLIENT_ID > /dev/null
+}
+teardown() {
+  CLIENT_UUID=$(./kc-client-query $TEST_CLIENT_ID | yq --null-input '.[0].id | select( . != null )')
+  ./kc-client-del $CLIENT_UUID # > /dev/null
+}
+
+test_add_new_role() {
+  CLIENT_UUID=$(./kc-client-query $TEST_CLIENT_ID | yq --null-input '.[0].id | select( . != null )')
+  if [ -z "$CLIENT_UUID" ]; then
+    # ./kc-client-query $client_id
+    fail "Client id '$TEST_CLIENT_ID' MUST BE PRE REGISTERED!"
+    return
+  fi
+
+  ROLE_URL=$(./kc-client-role-add "$CLIENT_UUID" "test-new-role" "teste new role description")
+  assert_not_equals "" ROLE_URL
+}

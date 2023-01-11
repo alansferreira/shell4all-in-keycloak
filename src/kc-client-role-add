@@ -1,0 +1,33 @@
+#!/bin/bash
+source ./kc-token
+
+## USAGE:
+# ./kc-client add-role 'c3a96e83-fccb-48a7-9bf3-01a201824efb' 'my-realm' 'my role name' 'my role description'
+# ./kc-client add-role 'c3a96e83-fccb-48a7-9bf3-01a201824efb' 'my-realm' 'my role name' 'my role description'
+
+[[ "$1" =~ ^https?$ ]] && CLIENT_URL=$1
+[[ "$1" =~ ^[a-z0-9-]+$ ]] && CLIENT_URL="${KC_REALM_URL}/clients/$1"
+
+NAME=${2-$NAME}
+DESCRITION=${3-$DESCRITION}
+
+# echo "CLIENT_URL: ${CLIENT_URL}"
+# echo "NAME: ${NAME}"
+# echo "DESCRITION: ${DESCRITION}"
+# echo "CURL_URL: ${CLIENT_URL}/roles"
+# echo "KC_ACCESS_TOKEN: ${KC_ACCESS_TOKEN}"
+# echo "  {\"name\":\"${NAME}\",\"description\":\"${DESCRITION}\"}"
+
+CLIENT_ADD_ROLE_RESULT=$(curl "${CLIENT_URL}/roles" \
+  -X POST \
+  -sSL -D - \
+  -H "Authorization: Bearer ${KC_ACCESS_TOKEN}" \
+  -H 'Content-Type: application/json;charset=utf-8' \
+  --data-raw "{\"name\":\"${NAME}\",\"description\":\"${DESCRITION}\"}" \
+  -o /dev/null | \
+  grep "Location:" | \
+  cut -d ' ' -f2-
+)
+
+echo -n $CLIENT_ADD_ROLE_RESULT
+
