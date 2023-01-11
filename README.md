@@ -3,9 +3,14 @@ Simple interface to keycloak apis based on shell script.
 
 ## Usage
 
+### Configurarion
+
 > First fill your keycloak instance parameters on `.env` file.
 
 > Make sure that scripts have **execution permissions** `chmod +x kc-client-*`
+
+> Keycloak instance and realm must have an `client id` configured with `Access Type` as "**confidential**", `Standard Flow Enabled` **off** and `Service Accounts Enabled` **on**.
+
 
 
 ```console
@@ -23,7 +28,7 @@ $ kc-client-del "ea4e833d-2b10-4fd9-b5e2-059a30006326"
 
 ### Releasing
 
-Just run `.make` to dump all in one.
+Just run `./make` to dump all in one.
 
 ### Testing
 
