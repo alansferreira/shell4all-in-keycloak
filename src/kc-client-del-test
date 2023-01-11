@@ -4,9 +4,6 @@ source .env.test
 setup() {
   ./kc-client-add $TEST_CLIENT_ID > /dev/null
 }
-# teardown() {
-#   ./kc-client-del $TEST_CLIENT_ID
-# }
 
 test_delete_client_by_uuid() {
   # TEST: default query first 20 itens
