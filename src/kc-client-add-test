@@ -6,7 +6,8 @@ setup() {
   ./kc-client-del $client_uuid > /dev/null
 }
 teardown() {
-  setup
+  client_uuid=$(./kc-client-query $TEST_CLIENT_ID | yq --null-input '.[0].id | select( . != null )')
+  ./kc-client-del $client_uuid > /dev/null
 }
 
 test_add_new_client() {
