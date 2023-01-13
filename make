@@ -27,7 +27,7 @@ do
 done
 
 echo -e "\nversion () {" >> bin/kc-client
-echo -e "  echo \"$(cat .semver)\"" >> bin/kc-client
+echo -e "  echo \"$(cat semver)\"" >> bin/kc-client
 echo -e "}\n" >> bin/kc-client
 
 
