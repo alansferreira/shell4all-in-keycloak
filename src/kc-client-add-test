@@ -2,19 +2,19 @@
 source .env.test
 
 setup() {
-  client_uuid=$(./kc-client-query $TEST_CLIENT_ID | yq --null-input '.[0].id | select( . != null )')
-  ./kc-client-del $client_uuid > /dev/null
+  CLIENT_UUID=$(./kc-client-query $TEST_CLIENT_ID | yq --null-input '.[0].id | select( . != null )')
+  ./kc-client-del $CLIENT_UUID > /dev/null
 }
 teardown() {
-  client_uuid=$(./kc-client-query $TEST_CLIENT_ID | yq --null-input '.[0].id | select( . != null )')
-  ./kc-client-del $client_uuid > /dev/null
+  CLIENT_UUID=$(./kc-client-query $TEST_CLIENT_ID | yq --null-input '.[0].id | select( . != null )')
+  ./kc-client-del $CLIENT_UUID > /dev/null
 }
 
 test_add_new_client() {
   # TEST: default query first 20 itens
-  client_uuid=$(./kc-client-query $TEST_CLIENT_ID | yq --null-input '.[0].id | select( . != null )')
+  CLIENT_UUID=$(./kc-client-query $TEST_CLIENT_ID | yq --null-input '.[0].id | select( . != null )')
 
-  if [ "$client_uuid" ]; then
+  if [ "$CLIENT_UUID" ]; then
     # ./kc-client-query $client_id
     fail "Client id '$TEST_CLIENT_ID' already exists!"
   fi
