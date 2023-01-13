@@ -1,5 +1,8 @@
 #!/bin/bash
-source ./.env
+# source ./cecho
+# source ./.env
+
+# PATH=$(pwd)/lib:$(pwd)/src:$(pwd)/bin:$PATH
 
 KC_TOKEN=$(curl -s --request POST \
   --url ${KC_INSTANCE_URL}/auth/realms/${REALM}/protocol/openid-connect/token \
