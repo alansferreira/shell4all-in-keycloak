@@ -1,0 +1,7 @@
+#!/bin/bash
+git mkver patch 
+./make
+git add .
+git commit -m "build: bumping to $(cat .semver)"
+git mkver tag
+git push --follow-tags
