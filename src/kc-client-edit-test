@@ -19,5 +19,5 @@ test_edit_client() {
   fi
 
   CLIENT_DATA="{\"id\": \"$client_uuid\", \"description\": \"DDDDD\"}"
-  ./kc-client-edit "${KC_REALM_URL}/clients/$client_uuid" "$CLIENT_DATA"
+  CLIENT_DATA=$CLIENT_DATA ./kc-client-edit "${KC_REALM_URL}/clients/$client_uuid" 
 }

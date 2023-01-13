@@ -2,11 +2,13 @@
 source ./kc-token
 
 CLIENT_ID_URL=${1-$CLIENT_ID_URL}
-CLIENT_DATA=${2-$CLIENT_DATA}
-
+# CLIENT_DATA=${2-$CLIENT_DATA}
 # echo "CLIENT_ID_URL: $CLIENT_ID_URL"
 # echo "CLIENT_DATA: $CLIENT_DATA"
 # echo $CLIENT_DATA
+
+[[ -z "$CLIENT_DATA" ]] && echo "Var '\$CLIENT_DATA' json is empty, try use CLIENT_DATA='{\"description\": \"desc content\", ...}' ./kc-client-edit $CLIENT_ID_URL" && exit
+
 
 CLIENT_EDIT_RESULT=$(curl ${CLIENT_ID_URL} \
   -s -X PUT \
