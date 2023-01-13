@@ -1,0 +1,27 @@
+#!/bin/bash
+source ./kc-token
+
+### USAGE:
+#  kc-client-get 'my-client-id-query'                  # it's will bring by default the first page with max 20 records
+#  FIRST=20 MAX=20 kc-client-get 'my-client-id-query'  # it's will skip first 20 records and bring max 20 records
+
+CLIENT_UUID=${1-$CLIENT_UUID}
+
+SEARCH=${2-$SEARCH}
+
+REALM=${3-$REALM}
+REALM=${REALM-master}
+
+FIRST=${FIRST-0}
+MAX=${MAX-20}
+
+
+SEARCH_URL="${KC_INSTANCE_URL}/auth/admin/realms/${REALM}/clients/${CLIENT_UUID}/roles?first=${FIRST}&max=${MAX}&search=${SEARCH}"
+
+CLIENT_GET_RESULT=$(curl -s --request GET \
+  --url "${SEARCH_URL}" \
+  --header "Authorization: Bearer ${KC_ACCESS_TOKEN}" \
+  --header 'Content-Type: application/json;charset=utf-8'
+)
+
+echo -n $CLIENT_GET_RESULT

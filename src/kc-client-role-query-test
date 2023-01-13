@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+source ./.env.test
+
+test_should_print_query_with_default_values() {
+  # TEST: default query first 20 itens
+  CLIENT_UUID=$(./kc-client-query master-realm | yq --null-input '.[0].id | select( . != null )')
+  LEN=$(CLIENT_UUID=$CLIENT_UUID ./kc-client-role-query | yq '. | length()')
+  assert_not_equals "21" $LEN
+  assert_not_equals "0" $LEN
+}
+
+test_should_print_query_with_max_2_values() {
+  # TEST: default query first 20 itens
+  CLIENT_UUID=$(./kc-client-query master-realm | yq --null-input '.[0].id | select( . != null )')
+  LEN=$(CLIENT_UUID=$CLIENT_UUID MAX=2 ./kc-client-role-query | yq '. | length()')
+  assert_equals "2" "$LEN"
+}
