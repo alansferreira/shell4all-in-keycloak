@@ -1,0 +1,57 @@
+#!/bin/bash
+source ./.env
+source ./cecho
+# yml=$(Agent.BuildDirectory)/app/.azuredevops/config/${{parameters.environment}}/keycloak.yml
+
+
+yml=kc-data.yaml
+
+realms_len=$(yq '.realms | length' $yml)
+realms_seq=$(seq 0 $(expr $realms_len - 1))
+
+echo -e "Founded $realms_len realm(s) definition(s)."
+
+for r in $realms_seq;
+do 
+
+  realm_name=$(yq ".realms[$r].realmName" $yml)
+
+  clients_len=$(yq ".realms[$r].clients | length" $yml)
+  clients_seq=$(seq 0 $(expr $clients_len - 1))
+
+  echo -e "Founded $clients_len client(s) definition(s) on realm '$realm_name'."
+  
+  for c in $clients_seq;
+  do 
+    client_id=$(yq ".realms[$r].clients[$c].clientId" $yml)
+    client_json=$(yq -I 0 -o json ".realms[$r].clients[$c]" $yml)
+
+    client_uuid=$(./kc-client query $client_id | yq --null-input '.[0].id | select( . != null )')
+    if [ -z "$client_uuid" ]; then
+      echo "Adding new client '$client_id'..."
+      CLIENT_URL=$(./kc-client add $client_id $realm_name)
+    else
+      CLIENT_URL="${KC_REALM_URL}/clients/$client_uuid"
+      echo "Client '$client_id' already exists on '$CLIENT_URL' and will be updated..."
+    fi
+    
+    CLIENT_DATA=$client_json ./kc-client edit $CLIENT_URL
+
+    roles_json=$(yq -I 0 -o json ".realms[$r].mappings.[] | select(.clientId == \"$client_id\") | .roles" $yml)
+    roles_len=$(echo $roles_json | yq ". | length")
+    roles_seq=$(seq 0 $(expr $roles_len - 1))
+
+    echo -e "Founded $roles_len role(s) definition(s) on client mappings for '$client_id'."
+    
+    for l in $roles_seq;
+    do 
+      role_name=$(echo $roles_json | yq ".[$l].name")
+      role_json=$(echo $roles_json | yq -I 0 -o json ".[$l]")
+      echo "Role mapping '$role_name' to '$client_id'"
+      echo "  $role_json"
+
+      CLIENT_ROLE_DATA=$role_json ./kc-client role-add "$client_uuid"
+
+    done
+  done
+done
