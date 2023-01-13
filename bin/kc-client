@@ -1,10 +1,11 @@
 #!/bin/bash
+# source ./cecho
+# source ./.env
 
-source ./.env
+# PATH=$(pwd)/lib:$(pwd)/src:$(pwd)/bin:$PATH
 
-# echo $KC_INSTANCE_URL
 KC_TOKEN=$(curl -s --request POST \
-  --url ${KC_INSTANCE_URL}/auth/realms/${REALM}/protocol/openid-connect/kc-token \
+  --url ${KC_INSTANCE_URL}/auth/realms/${REALM}/protocol/openid-connect/token \
   --header 'Content-Type: application/x-www-form-urlencoded' \
   --data grant_type=client_credentials \
   --data client_id=${KC_CLIENT_ID-'shell4all-keycloak'} \
@@ -26,7 +27,7 @@ add () {
     --url "${KC_INSTANCE_URL}/auth/admin/realms/${REALM}/clients" \
     --header "Authorization: Bearer ${KC_ACCESS_TOKEN}" \
     --header 'Content-Type: application/json;charset=utf-8' \
-    --data "{ \"enabled\":true, \"attributes\":{}, \"redirectUris\":[], \"clientId\":\"${CLIENT_ID}\", \"protocol\":\"openid-connect\"}" \
+    --data "{ \"enabled\":true, \"clientId\":\"${CLIENT_ID}\", \"protocol\":\"openid-connect\"}" \
     -o /dev/null | \
     grep "Location:" | \
     cut -d ' ' -f2-
@@ -58,11 +59,13 @@ edit () {
   # kc-client-edit
 
   CLIENT_ID_URL=${1-$CLIENT_ID_URL}
-  CLIENT_DATA=${2-$CLIENT_DATA}
-  
+  # CLIENT_DATA=${2-$CLIENT_DATA}
   # echo "CLIENT_ID_URL: $CLIENT_ID_URL"
   # echo "CLIENT_DATA: $CLIENT_DATA"
   # echo $CLIENT_DATA
+  
+  [[ -z "$CLIENT_DATA" ]] && echo "Var '\$CLIENT_DATA' json is empty, try use CLIENT_DATA='{\"description\": \"desc content\", ...}' ./kc-client-edit $CLIENT_ID_URL" && exit
+  
   
   CLIENT_EDIT_RESULT=$(curl ${CLIENT_ID_URL} \
     -s -X PUT \
@@ -108,10 +111,94 @@ query () {
 }
 
 
+role-add () {
+  # kc-client-role-add
+
+  ## USAGE:
+  # ./kc-client add-role 'c3a96e83-fccb-48a7-9bf3-01a201824efb' 'my-realm' 'my role name' 'my role description'
+  # ./kc-client add-role 'c3a96e83-fccb-48a7-9bf3-01a201824efb' 'my-realm' 'my role name' 'my role description'
+  
+  CLIENT_ID_URL=${1-$CLIENT_ID_URL}
+  
+  [[ "$1" =~ ^https?$ ]] && CLIENT_URL=$1
+  [[ "$1" =~ ^[a-z0-9-]+$ ]] && CLIENT_URL="${KC_REALM_URL}/clients/$1"
+  
+  [[ -z "$CLIENT_ROLE_DATA" ]] && CLIENT_ROLE_DATA="{\"name\":\"${2}\",\"description\":\"${3}\"}"
+  
+  # echo "CLIENT_URL: ${CLIENT_URL}"
+  # echo "NAME: ${NAME}"
+  # echo "DESCRITION: ${DESCRITION}"
+  # echo "CURL_URL: ${CLIENT_URL}/roles"
+  # echo "KC_ACCESS_TOKEN: ${KC_ACCESS_TOKEN}"
+  # echo "  {\"name\":\"${NAME}\",\"description\":\"${DESCRITION}\"}"
+  
+  CLIENT_ADD_ROLE_RESULT=$(curl "${CLIENT_URL}/roles" \
+    -X POST \
+    -sSL -D - \
+    -H "Authorization: Bearer ${KC_ACCESS_TOKEN}" \
+    -H 'Content-Type: application/json;charset=utf-8' \
+    --data-raw "$CLIENT_ROLE_DATA" \
+    -o /dev/null | \
+    grep "Location:" | \
+    cut -d ' ' -f2-
+  )
+  
+  echo -n $CLIENT_ADD_ROLE_RESULT
+  
+  # kc-client-role-add
+}
+
+
+role-del () {
+  # kc-client-role-del
+
+  [[ "$1" =~ ^https?$ ]] && CLIENT_ROLE_URL=$1
+  [[ "$1" =~ ^[a-z0-9-]+$ ]] && CLIENT_ROLE_URL="${KC_REALM_URL}/roles-by-id/$1"
+  
+  CLIENT_EDIT_RESULT=$(curl -s --request DELETE \
+    --url ${CLIENT_ROLE_URL} \
+    --header "Authorization: Bearer ${KC_ACCESS_TOKEN}"
+  )
+  
+  echo -n $CLIENT_EDIT_RESULT
+  
+  # kc-client-role-del
+}
+
+
+role-query () {
+  # kc-client-role-query
+
+  ### USAGE:
+  #  kc-client-get 'my-client-id-query'                  # it's will bring by default the first page with max 20 records
+  #  FIRST=20 MAX=20 kc-client-get 'my-client-id-query'  # it's will skip first 20 records and bring max 20 records
+  
+  CLIENT_UUID=${1-$CLIENT_UUID}
+  
+  SEARCH=${2-$SEARCH}
+  
+  REALM=${3-$REALM}
+  REALM=${REALM-master}
+  
+  FIRST=${FIRST-0}
+  MAX=${MAX-20}
+  
+  
+  SEARCH_URL="${KC_INSTANCE_URL}/auth/admin/realms/${REALM}/clients/${CLIENT_UUID}/roles?first=${FIRST}&max=${MAX}&search=${SEARCH}"
+  
+  CLIENT_GET_RESULT=$(curl -s --request GET \
+    --url "${SEARCH_URL}" \
+    --header "Authorization: Bearer ${KC_ACCESS_TOKEN}" \
+    --header 'Content-Type: application/json;charset=utf-8'
+  )
+  
+  echo -n $CLIENT_GET_RESULT
+  # kc-client-role-query
+}
+
+
 version () {
-  # kc-version
-echo -n "1.0.0"
-  # kc-version
+  echo ""
 }
 
 COMMAND=$1
