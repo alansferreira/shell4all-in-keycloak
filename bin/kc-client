@@ -167,7 +167,7 @@ role-del () {
 
 
 version () {
-  echo "0.2.1"
+  echo "0.3.0"
 }
 
 COMMAND=$1
