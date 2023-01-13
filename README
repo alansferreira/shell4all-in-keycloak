@@ -5,15 +5,13 @@ Simple interface to keycloak apis based on shell script.
 
 ### Configurarion
 
-
-
-#### Keycloak instance and realm must have an `client_id` configured as:
+### Keycloak instance and realm must have an `client_id` configured as:
 * `Access Type` as "**confidential**"
 * `Standard Flow Enabled` **off**
 * `Service Accounts Enabled` **on**
 * `Service Account Roles` **create-client**, **manage-clients**, **query-clients** and **view-clients** from `master-relm` client roles
 
-#### Fill your keycloak instance parameters on `.env` file.
+### Fill your keycloak instance parameters on `.env` file.
 
 ```sh
 export ENV='dev'
@@ -27,7 +25,7 @@ export KC_REALM_URL=${KC_INSTANCE_URL}/auth/admin/realms/${REALM}
 
 ```
 
-#### Make sure that scripts have **execution permissions** `chmod +x kc-*`
+### Make sure that scripts have **execution permissions** `chmod +x kc-*`
 
 ```sh
 chmod +x kc-*
@@ -46,40 +44,15 @@ $ kc-client-del "ea4e833d-2b10-4fd9-b5e2-059a30006326"
 
 ```
 
-### Releasing
+## Releasing
 
-This project has configured to use **git-mkver** to version bumps.
+This project has configured to use **git-mkver** to version bumps base on **conventional commits** standards, just run `./release` when version is ready to release.
 
-## Create an 'fix' commit
-```console
-$ git commit -m "fix: this is an fix commit" --allow-empty
-```
-## Bumping new version
-```console
-$ git mkver patch 
-```
-## Commit Bumped files
-```console
-$ git add .semver
-$ git commit -m "build: bumping to $(cat .semver)"
-$ git mkver tag
-```
-## Push your(s) tag(s) to remote
-```console
-$ git push --follow-tags
-```
-
-## And finally to bumps final CLI use:
-```console
-./make
-```
-
-
-### Testing
+## Testing
 
 You can use `docker-compose.yaml` to **e2e** tests.
 
-Tests are based on `bash_unit`
+Tests are based on `bash_unit`.
 
 ```console
 $ cd src
