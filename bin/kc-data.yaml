@@ -1,0 +1,23 @@
+realms: 
+- realmName: master
+  clients:
+  - clientId: my-client-test
+    enabled: true
+    description: "my client description"
+  mappings:
+  - clientId: my-client-test
+    roles:
+    - name: custom-role-one
+      description: My custom role one
+      composite: false
+      clientRole: true
+    - name: custom-role-two
+      description: My custom role two
+      composite: false
+      clientRole: true
+  - clientId: my-client-testdddd
+    roles:
+    - name: custom-role-one
+      description: My custom role one
+      composite: false
+      clientRole: true
